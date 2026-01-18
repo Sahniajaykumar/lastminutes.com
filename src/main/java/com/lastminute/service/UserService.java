@@ -28,18 +28,27 @@ public class UserService {
             response.setMessage("Registration Failed");
             response.setStatus(400);
             response.setData("Username already exists");
+            return response;
         }
 
         if(appUserRepository.existsByEmail(appUserDto.getEmail())){
             response.setMessage("Registration Failed");
             response.setStatus(400);
             response.setData("Email already exists");
+            return response;
         }
 
         AppUser appUser = new AppUser();
         BeanUtils.copyProperties(appUserDto , appUser);
         appUser.setPassword(passwordEncoder.encode(appUserDto.getPassword()));
-        appUserRepository.save(appUser) ;
+        AppUser savedUser = appUserRepository.save(appUser) ;
+
+        if (savedUser == null) {
+            response.setMessage("Registration Failed");
+            response.setStatus(500);
+            response.setData("Unexpected server error");
+            return response;
+        }
 
         response.setMessage("Registration Successful");
         response.setStatus(201);
